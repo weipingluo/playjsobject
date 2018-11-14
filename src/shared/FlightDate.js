@@ -3,23 +3,37 @@ const firstDate = moment('1970-01-01');
 const forever = moment('9999-12-31');
 const dateFormat = "YYYY-MM-DD";
 export default class FlightDate {
+    static FOREVER = new FlightDate();
     constructor(startDate = firstDate, endDate = forever) {
-        endDate
         moment(startDate).isValid() ? this.startDate = moment(startDate) : this.startDate = firstDate;
         moment(endDate).isValid() ? this.endDate = moment(endDate) : this.endDate = forever;
     }
 
-    print() {
-        return `${this.startDate.format(dateFormat)}-${this.endDate.format(dateFormat)}`;
+    toString() {
+        return `${this.startDate.format(dateFormat)}, ${this.endDate.format(dateFormat)}`;;
     }
 
+    
     toJSON() {
-        return `{"startDate":${this.startDate.format(dateFormat)},"endDate":${this.endDate.format(dateFormat)}}`;
+        return {startDate: this.startDate.format(dateFormat),
+                endDate: this.endDate.format(dateFormat)};
     }
 
     theSame(another) {
         this.validateParameter(another);
         if (this.startDate.isSame(another.startDate) && this.endDate.isSame(another.endDate)) {
+            return true;
+        }
+        return false;
+    }
+
+    isInside(date) {
+        var theDate = moment(date);
+        if (!theDate.isValid()) {
+            throw new Error("Paramenter type error");
+        }
+
+        if (theDate.isSameOrAfter(this.startDate) && theDate.isSameOrBefore(this.endDate)) {
             return true;
         }
         return false;
@@ -55,7 +69,9 @@ export default class FlightDate {
         }
 
         flightDates.forEach(function (fd) {
-            this.validateParameter(fd);
+            if (!(fd instanceof FlightDate)) {
+                throw new Error("Paramenter type error");
+            }
         });
 
         flightDates.sort(function (a, b) {
@@ -70,6 +86,7 @@ export default class FlightDate {
             }
             return 0;
         })
+        return flightDates;
     }
 
 }
